@@ -14,3 +14,5 @@ timestamp,cuenta_id,intencion,tokens_prompt,tokens_completion,total_tokens,laten
 2026-06-21T22:30:30.486138+00:00,CTA002,gestion_clave,1408,148,1556,4849.89,0.0003,gpt-4o-mini,False
 2026-06-21T22:38:54.724697+00:00,CTA002,gestion_clave,1408,151,1559,2996.51,0.000302,gpt-4o-mini,False
 2026-06-21T22:39:11.031565+00:00,CTA001,datos_personales,1400,80,1480,3430.27,0.000258,gpt-4o-mini,True
+2026-06-21T22:45:03.536974+00:00,CTA001,datos_personales,1400,93,1493,3098.25,0.000266,gpt-4o-mini,True
+2026-06-21T22:45:44.252091+00:00,CTA002,gestion_clave,1408,149,1557,3539.44,0.000301,gpt-4o-mini,True

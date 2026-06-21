@@ -162,17 +162,21 @@ def auditar_respeto(respuesta: str) -> AuditoriaGuardrail:
         )
 
     # Regla 4: canales externos no oficiales
-    # Rechaza si hay una sugerencia explicita de contacto por email externo
-    # (ej: "escribanos a soporte@terceros.com"), pero no si el email
-    # aparece enmascarado como dato del propio cliente (ej: "j***z@gmail.com")
-    patron_contacto_externo = re.compile(
-        r"(escribi|escrib[aá]nos|contact|comuni[cq]|envi[aá]|mand[aá]|dirij)[^@]{0,40}@(?!banco|0800)[a-z][a-z0-9.-]+\.[a-z]{2,}",
+    # Detecta verbos de contacto seguidos de un email externo completo.
+    # Se excluyen matches con asteriscos (emails enmascarados del cliente
+    # como m***z@hotmail.com) y dominios del banco.
+    _patron_r4 = re.compile(
+        r"(escribi|escrib[aá]nos|contact[ae]|comuni[cq][aá]"
+        r"|envi[aei][a-z]*|mand[aá]|dirij)[^.]{0,60}"
+        r"@(?!banco|0800)[a-z][a-z0-9.-]+\.[a-z]{2,}",
         re.IGNORECASE
     )
-    if patron_contacto_externo.search(respuesta):
-        motivos.append(
-            "La respuesta sugiere contacto por canales externos no oficiales. "
-            "Solo usar el 0800-333-2265 o sucursales oficiales."
-        )
+    for _match in _patron_r4.finditer(respuesta):
+        if "*" not in _match.group(0):
+            motivos.append(
+                "La respuesta sugiere contacto por canales externos no oficiales. "
+                "Solo usar el 0800-333-2265 o sucursales oficiales."
+            )
+            break
 
     return AuditoriaGuardrail(aprobado=len(motivos) == 0, motivos=motivos)
