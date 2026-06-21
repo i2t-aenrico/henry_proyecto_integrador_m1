@@ -48,7 +48,7 @@ Se combina **few-shot** con **chain-of-thought (CoT)**:
   `<thinking>` antes de generar la respuesta. Esto mejora la precision
   en intenciones ambiguas y reduce alucinaciones en `confidence` y `actions`.
 
-Documentacion completa en `reports/PI_report.md`.
+Documentacion completa en `reports/PI_report_en.md`.
 
 ---
 
@@ -113,11 +113,9 @@ uv run python src/run_query.py -m "cuanto tengo?" --dry-run
   }
 }
 
-
-
-
 [metricas] tokens=960  latencia=1423ms  costo=$0.000210  guardrail=OK
 ```
+
 ### Ejemplo de seguridad — intento de acceder a la cuenta de un tercero
 
 El modelo razona sobre privacidad por si solo, sin que ninguna regla del
@@ -130,7 +128,7 @@ uv run python src/run_query.py -m "cuanto SALDO tiene la cuenta de mi amigo MARC
 
 ```json
 {
-  "answer": "Lamentablemente, no puedo acceder a la información de la cuenta de otras personas por razones de privacidad y seguridad. Si necesitas información sobre tu propia cuenta, estaré encantado de ayudarte.",
+  "answer": "Lamentablemente, no puedo acceder a la informacion de la cuenta de otras personas por razones de privacidad y seguridad. Si necesitas informacion sobre tu propia cuenta, estare encantado de ayudarte.",
   "confidence": 0.9,
   "intent": "no_reconocido",
   "actions": [],
@@ -145,6 +143,7 @@ criterio propio mas alla de las reglas en codigo. El guardrail cubre
 invariantes tecnicos (no exponer numeros de cuenta, no usar lenguaje
 inapropiado); la privacidad de datos de terceros la resuelve el modelo
 por razonamiento.
+
 ---
 
 ## Tests
@@ -191,13 +190,14 @@ m1p1-asistente-bancario/
 │   ├── settings.py         Configuracion y fabrica del cliente OpenAI
 │   ├── tools.py            Herramientas de consulta + guardrail
 │   ├── prompts_loader.py   Carga el prompt desde prompts/
-│   └── metrics_writer.py   Escribe metricas en CSV
+│   ├── metrics_writer.py   Escribe metricas en CSV
+│   └── safety.py           Guardrail de entrada y salida (BONUS)
 ├── prompts/
 │   └── main_prompt.txt     Prompt few-shot + CoT (fuente de verdad)
 ├── metrics/
 │   └── metrics.csv         Registro de ejecuciones
 ├── reports/
-│   └── PI_report.md        Informe del proyecto
+│   └── PI_report_en.md        Informe del proyecto
 ├── tests/
 │   └── test_core.py        Suite de tests (sin LLM)
 ├── pyproject.toml          Dependencias

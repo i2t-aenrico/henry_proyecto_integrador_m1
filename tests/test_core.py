@@ -32,12 +32,12 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 from database import CUENTAS
 from schemas import RespuestaAsistente, MetricasEjecucion
 from tools import (
-    auditar_respeto,
     consultar_saldo,
     obtener_resumen,
     iniciar_reset_clave,
     actualizar_dato,
 )
+from safety import auditar_respeto
 from settings import calcular_costo
 from run_query import detectar_intencion
 

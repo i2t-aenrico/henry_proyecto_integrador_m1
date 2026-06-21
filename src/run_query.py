@@ -25,7 +25,8 @@ sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 from settings import MODELO, TEMPERATURA, calcular_costo, get_client
 from schemas import MetricasEjecucion, RespuestaAsistente
-from tools import HERRAMIENTAS, auditar_respeto, consultar_saldo, obtener_resumen
+from tools import HERRAMIENTAS, consultar_saldo, obtener_resumen
+from safety import auditar_entrada, auditar_respeto, FALLBACK_ADVERSARIAL
 from prompts_loader import SYSTEM_ASISTENTE, TEMPLATE_USUARIO
 from metrics_writer import registrar_metrica
 
@@ -306,6 +307,19 @@ def main() -> None:
     args = parsear_argumentos()
 
     cuenta_id = args.cuenta.upper()
+
+    # Guardrail de entrada — detecta prompts adversariales antes de gastar tokens
+    auditoria_entrada = auditar_entrada(args.mensaje)
+    if not auditoria_entrada.aprobado:
+        print(json.dumps({
+            "answer": FALLBACK_ADVERSARIAL,
+            "confidence": 0.0,
+            "intent": "no_reconocido",
+            "actions": ["Llamar al 0800-333-2265"],
+            "data": {"guardrail_entrada_motivos": auditoria_entrada.motivos}
+        }, ensure_ascii=False, indent=2))
+        print(f"\n[seguridad] entrada RECHAZADA: {auditoria_entrada.motivos}", file=sys.stderr)
+        return
 
     # Pre-ejecutar herramienta antes de llamar al LLM
     intencion = detectar_intencion(args.mensaje)
