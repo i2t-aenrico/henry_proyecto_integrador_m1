@@ -1,0 +1,10 @@
+timestamp,cuenta_id,intencion,tokens_prompt,tokens_completion,total_tokens,latency_ms,estimated_cost_usd,model,guardrail_aprobado
+2025-06-21T14:02:11.341Z,CTA001,consulta_saldo,812,148,960,1423.50,0.000210,gpt-4o-mini,True
+2025-06-21T14:03:28.917Z,CTA002,gestion_clave,834,172,1006,1651.20,0.000228,gpt-4o-mini,True
+2025-06-21T14:04:55.203Z,CTA001,resumen_cuenta,1124,231,1355,2187.40,0.000307,gpt-4o-mini,True
+2025-06-21T14:06:10.572Z,CTA003,datos_personales,843,163,1006,1534.80,0.000224,gpt-4o-mini,True
+2025-06-21T14:07:44.118Z,CTA001,no_reconocido,798,112,910,1312.60,0.000187,gpt-4o-mini,True
+2025-06-21T14:09:02.445Z,CTA004,consulta_saldo,815,151,966,1398.70,0.000213,gpt-4o-mini,True
+2025-06-21T14:10:19.882Z,CTA002,resumen_cuenta,1118,225,1343,2034.50,0.000303,gpt-4o-mini,True
+2026-06-21T21:54:12.457742+00:00,CTA001,consulta_saldo,1408,123,1531,8055.49,0.000285,gpt-4o-mini,True
+2026-06-21T21:55:18.147194+00:00,CTA001,no_reconocido,1415,75,1490,2812.53,0.000257,gpt-4o-mini,True

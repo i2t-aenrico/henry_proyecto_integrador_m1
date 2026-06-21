@@ -1,0 +1,25 @@
+# Variables de entorno — NUNCA subir al repositorio
+.env
+
+# Entornos virtuales
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Dependencias instaladas
+.uv/
+
+# Metricas con datos reales (opcional: descomentar para no versionar)
+# metrics/metrics.csv
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db

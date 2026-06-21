@@ -1,0 +1,26 @@
+[project]
+name = "m1p1-asistente-bancario"
+version = "1.0.0"
+description = "Asistente bancario con salida estructurada JSON — Proyecto Integrador Modulo 1"
+requires-python = ">=3.11"
+dependencies = [
+    "openai>=1.30.0",
+    "pydantic>=2.7.0",
+    "python-dotenv>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=5.0.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=5.0.0",
+]
