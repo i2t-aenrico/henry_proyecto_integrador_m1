@@ -13,13 +13,15 @@ El sistema sigue un pipeline lineal de 5 etapas:
 ```
 [Entrada CLI]
      |
+[auditar_entrada]      Guardrail de entrada (safety.py) — sin LLM, sin tokens
+     |
 [detectar_intencion]   Keywords deterministicos (sin LLM)
      |
 [ejecutar_herramienta] Base de datos simulada → JSON
      |
 [llamar_llm]           OpenAI gpt-4o-mini + few-shot + CoT → JSON
      |
-[auditar_respeto]      Guardrail en codigo (4 reglas)
+[auditar_respeto]      Guardrail de salida (safety.py) — 4 reglas en codigo
      |
 [registrar_metrica]    Append a metrics/metrics.csv
      |
@@ -34,7 +36,8 @@ El sistema sigue un pipeline lineal de 5 etapas:
 | `database.py` | Datos simulados del banco (reemplazable por API real) |
 | `schemas.py` | Contratos Pydantic: valida entradas y salidas |
 | `settings.py` | Carga del `.env` y fabrica del cliente OpenAI (lazy + cached) |
-| `tools.py` | Herramientas deterministicas + guardrail de seguridad |
+| `tools.py` | Herramientas deterministicas de consulta bancaria |
+| `safety.py` | Guardrail de entrada y salida (BONUS) |
 | `prompts_loader.py` | Lee `main_prompt.txt` y expone las constantes |
 | `metrics_writer.py` | Persistencia de metricas en CSV |
 

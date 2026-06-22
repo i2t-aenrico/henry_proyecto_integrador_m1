@@ -23,7 +23,7 @@ from pathlib import Path
 # Agrega src/ al path para imports relativos
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
-from settings import MODELO, TEMPERATURA, calcular_costo, get_client
+from settings import MODELO, TEMPERATURA, calcular_costo, validar_credenciales
 from schemas import MetricasEjecucion, RespuestaAsistente
 from tools import HERRAMIENTAS, consultar_saldo, obtener_resumen
 from safety import auditar_entrada, auditar_respeto, FALLBACK_ADVERSARIAL
@@ -189,19 +189,26 @@ def llamar_llm(
         )
         return respuesta_mock, metricas_mock
 
-    client = get_client()
+    validar_credenciales()
     inicio = time.perf_counter()
 
-    raw = client.chat.completions.create(
+    import litellm
+    # response_format json_object solo lo soporta OpenAI.
+    # Claude y Gemini lo ignoran o tiran error — el JSON se pide via prompt.
+    modelo_lower = MODELO.lower()
+    kwargs = dict(
         model=MODELO,
         temperature=TEMPERATURA,
         messages=[
             {"role": "system", "content": SYSTEM_ASISTENTE},
             {"role": "user",   "content": prompt_usuario},
-        ],
-        response_format={"type": "json_object"},
+        ]
     )
+    if "gpt" in modelo_lower or "o1" in modelo_lower:
+        kwargs["response_format"] = {"type": "json_object"}
 
+    raw = litellm.completion(**kwargs)
+    
     latencia_ms = (time.perf_counter() - inicio) * 1000
 
     # Tokens reales devueltos por la API (no estimacion)
@@ -210,7 +217,21 @@ def llamar_llm(
     total_tokens      = raw.usage.total_tokens
     costo             = calcular_costo(tokens_prompt, tokens_completion)
 
-    contenido = raw.choices[0].message.content or "{}"
+    contenido_raw = raw.choices[0].message.content or "{}"
+    
+    # Claude devuelve el JSON envuelto en ```json ... ``` y con <thinking> afuera.
+    # Limpiamos ambos antes de parsear.
+    import re as _re
+    # 1. Extraer bloque ```json ... ``` si existe
+    _match_json = _re.search(r"```json\s*([\s\S]*?)\s*```", contenido_raw)
+    if _match_json:
+        contenido = _match_json.group(1).strip()
+    else:
+        # 2. Si no hay backticks, eliminar bloque <thinking>...</thinking>
+        contenido = _re.sub(r"<thinking>[\s\S]*?</thinking>", "", contenido_raw).strip()
+        # 3. Si empieza con { es JSON directo
+        if not contenido.startswith("{"):
+            contenido = "{}"
 
     # Parsear y validar con Pydantic
     try:

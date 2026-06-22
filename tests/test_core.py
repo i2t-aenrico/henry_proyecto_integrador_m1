@@ -275,12 +275,18 @@ class TestCalcularCosto:
 
     def test_calculo_conocido(self) -> None:
         """
-        1000 tokens prompt  @ $0.15/1M = $0.00015
-        500  tokens output  @ $0.60/1M = $0.00030
-        Total = $0.00045
+        Verifica que el calculo de costo sea correcto para el modelo activo.
+        Usa los precios de gpt-4o-mini (default):
+            1000 tokens prompt  @ $0.15/1M = $0.00015
+            500  tokens output  @ $0.60/1M = $0.00030
+            Total = $0.00045
+        Si se cambia el modelo via .env, el costo esperado cambia tambien.
         """
+        from settings import _precios_modelo
+        precio_input, precio_output = _precios_modelo()
+        esperado = round(1000 * precio_input / 1_000_000 + 500 * precio_output / 1_000_000, 6)
         costo = calcular_costo(1000, 500)
-        assert abs(costo - 0.00045) < 1e-9
+        assert abs(costo - esperado) < 1e-9
 
     def test_siempre_positivo(self) -> None:
         assert calcular_costo(100, 50) >= 0.0
