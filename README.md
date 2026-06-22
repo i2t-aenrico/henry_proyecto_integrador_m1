@@ -1,9 +1,10 @@
 # Asistente Bancario — Proyecto Integrador Modulo 1
 
 Asistente de atencion al cliente para un banco argentino. Recibe consultas
-en lenguaje natural, llama a la API de OpenAI con la tecnica **few-shot +
+en lenguaje natural, llama al LLM configurado con la tecnica **few-shot +
 chain-of-thought** y devuelve siempre **JSON valido** con campos nombrados.
 Registra metricas reales por ejecucion (tokens, latencia, costo).
+Soporta multiples proveedores via LiteLLM: OpenAI, Anthropic y Gemini.
 
 ---
 
@@ -23,7 +24,7 @@ run_query.py
     |       +-- iniciar_reset_clave()
     |       +-- actualizar_dato()
     |
-    +-- llamar_llm()               Llamada a OpenAI con few-shot + CoT
+    +-- llamar_llm()               Llamada al LLM via LiteLLM con few-shot + CoT
     |       |
     |       +-- SYSTEM_ASISTENTE   Prompt con 3 ejemplos few-shot
     |       +-- TEMPLATE_USUARIO   Contexto: cuenta, herramienta, mensaje
@@ -58,7 +59,7 @@ Documentacion completa en `reports/PI_report_en.md`.
 
 - Python >= 3.11
 - [uv](https://docs.astral.sh/uv/) (gestor de entornos y dependencias)
-- Una `OPENAI_API_KEY`
+- API key del proveedor elegido (OpenAI, Anthropic o Gemini)
 
 ---
 
@@ -67,8 +68,17 @@ Documentacion completa en `reports/PI_report_en.md`.
 ```bash
 # Desde la raiz del proyecto
 cp .env.example .env
-# Editar .env y completar OPENAI_API_KEY=sk-...
+# Editar .env: elegir modelo y completar la API key correspondiente
 ```
+
+El proveedor se controla con la variable `MODELO` en el `.env`:
+
+| Modelo | Proveedor | Variable requerida |
+|---|---|---|
+| `gpt-4o-mini` (default) | OpenAI | `OPENAI_API_KEY` |
+| `gpt-4o` | OpenAI | `OPENAI_API_KEY` |
+| `claude-haiku-4-5` | Anthropic | `ANTHROPIC_API_KEY` |
+| `claude-sonnet-4-6` | Anthropic | `ANTHROPIC_API_KEY` |
 
 ---
 
@@ -97,6 +107,22 @@ uv run python src/run_query.py -m "quiero cambiar mi email a nuevo@mail.com"
 
 # Prueba sin consumir tokens (dry-run)
 uv run python src/run_query.py -m "cuanto tengo?" --dry-run
+```
+
+### Suite de ejemplos
+
+Ejecuta los 9 casos de prueba en secuencia (todas las intenciones + casos
+de seguridad + errores controlados):
+
+```bash
+# Salida en pantalla
+uv run python src/ejemplos.py
+
+# Salida en archivo de log (se guarda en logs/ejemplos_YYYYMMDD_HHMM.log)
+uv run python src/ejemplos.py --log
+
+# Nombre de archivo personalizado
+uv run python src/ejemplos.py --log --archivo mi_prueba.log
 ```
 
 ### Salida de ejemplo
@@ -191,7 +217,7 @@ Los tests no consumen tokens (no llaman a la API):
 | TestGuardrail | Cada una de las 4 reglas de seguridad |
 | TestRespuestaAsistente | Validacion Pydantic del JSON de salida |
 | TestDetectarIntencion | 9 casos de clasificacion por keywords |
-| TestCalcularCosto | Formula de costo con gpt-4o-mini |
+| TestCalcularCosto | Formula de costo dinamica segun modelo activo |
 
 ---
 
@@ -213,9 +239,10 @@ Los tests no consumen tokens (no llaman a la API):
 m1p1-asistente-bancario/
 ├── src/
 │   ├── run_query.py        Script principal (entry point)
+│   ├── ejemplos.py         Suite de 9 casos de prueba con salida a log
 │   ├── database.py         Datos simulados del banco
 │   ├── schemas.py          Contratos Pydantic
-│   ├── settings.py         Configuracion y fabrica del cliente OpenAI
+│   ├── settings.py         Configuracion multi-proveedor via LiteLLM
 │   ├── tools.py            Herramientas de consulta bancaria
 │   ├── safety.py           Guardrail de entrada y salida (BONUS)
 │   ├── prompts_loader.py   Carga el prompt desde prompts/
@@ -224,6 +251,7 @@ m1p1-asistente-bancario/
 │   └── main_prompt.txt     Prompt few-shot + CoT (fuente de verdad)
 ├── metrics/
 │   └── metrics.csv         Registro de ejecuciones
+├── logs/                   Logs generados por ejemplos.py
 ├── reports/
 │   └── PI_report_en.md     Informe del proyecto
 ├── tests/
@@ -244,5 +272,5 @@ m1p1-asistente-bancario/
 - `detectar_intencion()` usa keywords simples; en produccion se reemplazaria
   por un clasificador con embeddings o por el router LLM del reto del modulo 1.
 - Los movimientos solo cubren mayo y abril 2025 para CTA001/CTA002/CTA003.
-- El costo estimado usa precios de `gpt-4o-mini` a junio 2025; verificar
-  tarifas actuales en platform.openai.com.
+- El costo estimado usa precios de la tabla en `settings.py`; verificar
+  tarifas actuales en el sitio del proveedor elegido.
